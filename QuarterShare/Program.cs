@@ -1,6 +1,6 @@
 ﻿using QuarterShare.Command;
 using QuarterShare.Connection;
-using QuarterShare.Thread;
+using QuarterShare.Worker;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -27,7 +27,7 @@ namespace QuarterShare
 
             UserInput.ResolveShellArgument(args);
 
-            ServerThread SThread = new ServerThread(UsingHost, UsingPort);
+            ServerWorker SThread = new ServerWorker(UsingHost, UsingPort);
             QuarterServer UsingServer = SThread.Server;
 
             while (UserInput.ResolveInternalCommand(UsingServer, Console.ReadLine())) ;

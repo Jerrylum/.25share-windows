@@ -5,29 +5,29 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace QuarterShare.Thread
+namespace QuarterShare.Worker
 {
-    class ServerThread
+    class ServerWorker : Worker
     {
         public QuarterServer Server;
 
-        public ServerThread(IPAddress host, int port)
+        public ServerWorker(IPAddress host, int port)
         {
             Server = new QuarterServer(host, port);
 
-            new System.Threading.Thread(MainThread).Start(Server);
+            new Thread(MainThread).Start(Server);
         }
 
         private static void MainThread(object data)
         {
-            //System.Threading.Thread.CurrentThread.IsBackground = true;
             QuarterServer server = (QuarterServer)data;
 
             ColorPrint(
                 "@@@@@@@@@@@  Quarter Share\n@@@@@@@@@@@\n@@@@@@@@@@@  Use command ");
-            Color(ConsoleColor.Blue, ".help");
+            Blue(".help");
             ColorPrint(
                 " to learn more about the server's\n@@@###@###@  internal commands\n@@@@@#@#@@@\n" +
                 "@@@###@###@  The server is running at " + Program.UsingHost.ToString() + ":" + Program.UsingPort + "\n" +
@@ -38,7 +38,7 @@ namespace QuarterShare.Thread
                 try
                 {
                     TcpClient client = server.Listener.AcceptTcpClient();
-                    new ClientThread(server, client);
+                    new ClientWorker(server, client);
                 }
                 catch
                 {
@@ -62,22 +62,5 @@ namespace QuarterShare.Thread
             }
         }
 
-        private static void Color(ConsoleColor color, object o = null)
-        {
-            Console.ForegroundColor = color;
-            if (o != null)
-                Console.Write(o);
-            Console.ForegroundColor = ConsoleColor.White;
-        }
-
-        private static void Red(object o = null)
-        {
-            Color(ConsoleColor.DarkRed, o);
-        }
-
-        private static void White(object o = null)
-        {
-            Color(ConsoleColor.White, o);
-        }
     }
 }
