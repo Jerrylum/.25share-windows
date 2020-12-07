@@ -68,8 +68,10 @@ namespace QuarterShare.Command
         }
 
 
-        public static bool ResolveShellArgument(string[] args)
+        public static ServerConfig ResolveShellArgument(string[] args)
         {
+            ServerConfig rtn = new ServerConfig();
+
             ArgumentParser parser = new ArgumentParser(args);
             parser.AddDefault("--help", null);
             parser.AddDefault("--host", null);
@@ -81,31 +83,31 @@ namespace QuarterShare.Command
             {
                 PrintShellCommandHelp();
                 Environment.Exit(0);
-                return true;
+                return rtn;
             }
 
             try
             {
                 string StrHost = parser.Values["--host"];
                 string StrPort = parser.Values["--port"];
-                Program.DEFAULT_ALLOW = parser.Values["--allow"] != null;
-                ResolveFlag(parser.Values["--flag"]);
+                rtn.DefaultAllow = parser.Values["--allow"] != null;
+                rtn.Flags = ResolveFlag(parser.Values["--flag"]);
 
                 if (StrHost == null || IPAddress.TryParse(StrHost, out IPAddress Host) == false)
                     Host = Util.GetLocalNetworkIp();
 
-                Program.UsingHost = Host;
-                Program.UsingPort = int.Parse(StrPort);
+                rtn.Host = Host;
+                rtn.Port = int.Parse(StrPort);
 
             }
             catch
             {
-                Console.WriteLine("Error! return 1");
+                Console.WriteLine("Invalid argument error");
                 Environment.Exit(1);
-                return false;
+                return rtn;
             }
 
-            return true;
+            return rtn;
         }
 
         public static bool ResolveInternalCommand(QuarterServer server, string raw)
@@ -114,16 +116,20 @@ namespace QuarterShare.Command
             return false;
         }
 
-        public static void ResolveFlag(string flag)
+        public static Dictionary<string, bool> ResolveFlag(string flag)
         {
+            var flags = new Dictionary<string, bool>();
+
             bool Alpha(string a, string b)
             {
-                return Program.DEFAULT_FLAGS[a] = flag.Contains(b);
+                return flags[a] = flag.Contains(b);
             }
 
             Alpha("typing", "t");
             Alpha("clipboard", "c");
             Alpha("print", "p");
+
+            return flags;
         }
     }
 }

@@ -2,19 +2,12 @@
 using QuarterShare.Connection;
 using QuarterShare.Worker;
 using System;
-using System.Collections.Generic;
-using System.Net;
 using System.Text;
 
 namespace QuarterShare
 {
     class Program
     {
-        public static bool DEFAULT_ALLOW = false;
-        public static Dictionary<string, bool> DEFAULT_FLAGS = new Dictionary<string, bool>();
-        public static IPAddress UsingHost;
-        public static int UsingPort;
-
 
         static void Main(string[] args)
         {
@@ -25,9 +18,9 @@ namespace QuarterShare
 
 
 
-            UserInput.ResolveShellArgument(args);
+            ServerConfig config = UserInput.ResolveShellArgument(args);
 
-            ServerWorker SThread = new ServerWorker(UsingHost, UsingPort);
+            ServerWorker SThread = new ServerWorker(config);
             QuarterServer UsingServer = SThread.Server;
 
             while (UserInput.ResolveInternalCommand(UsingServer, Console.ReadLine())) ;

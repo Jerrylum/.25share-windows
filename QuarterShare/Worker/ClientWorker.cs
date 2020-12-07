@@ -39,6 +39,9 @@ namespace QuarterShare.Worker
                     if (result == null)
                         throw new Exception("Closed");
 
+                    if (!client.Allowed)
+                        continue;
+
 
                     byte[] MsgID = result.Take(4).ToArray();
                     byte[] Msg = result.Skip(4).ToArray();
@@ -86,17 +89,13 @@ namespace QuarterShare.Worker
         {
             string str = Encoding.UTF8.GetString(msg);
 
-            if (Program.DEFAULT_FLAGS["typing"])
-            {
+            if (client.Server.Flags["typing"])
                 Keyboard.SendString(str);
-            }
 
-            if (Program.DEFAULT_FLAGS["clipboard"])
-            {
+            if (client.Server.Flags["clipboard"])
                 Keyboard.SetClipboard(str);
-            }
 
-            if (Program.DEFAULT_FLAGS["print"])
+            if (client.Server.Flags["print"])
             {
                 Blue("#" + client.Id + "> ");
                 White(str + "\n");

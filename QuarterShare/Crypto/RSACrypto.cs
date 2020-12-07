@@ -20,7 +20,6 @@ namespace QuarterShare.Crypto
 
             // https://gist.github.com/ststeiger/f4b29a140b1e3fd618679f89b7f3ff4a
 
-            StringWriter outputStream = new StringWriter();
             var parameters = RSA.ExportParameters(false);
             using (var stream = new MemoryStream())
             {
@@ -62,7 +61,7 @@ namespace QuarterShare.Crypto
                 }
 
                 Base64PublicKey = new string(Convert.ToBase64String(stream.GetBuffer(), 0, (int)stream.Length).ToCharArray());
-                BinaryPublicKey = Convert.FromBase64String(Base64PublicKey);
+                BinaryPublicKey = Convert.FromBase64String(Base64PublicKey); // important
             }
 
         }
@@ -73,10 +72,9 @@ namespace QuarterShare.Crypto
             {
                 return RSA.Encrypt(DataToEncrypt, DoOAEPPadding);
             }
-            catch (CryptographicException e)
+            catch
             {
-                Console.WriteLine("Error1");
-
+                Console.WriteLine("Error> RSA Encryption Error");
                 return null;
             }
         }
@@ -87,10 +85,9 @@ namespace QuarterShare.Crypto
             {
                 return RSA.Decrypt(DataToDecrypt, DoOAEPPadding);
             }
-            catch (CryptographicException e)
+            catch
             {
-                Console.WriteLine("Error2");
-
+                Console.WriteLine("Error> RSA Decrypt Error");
                 return null;
             }
         }

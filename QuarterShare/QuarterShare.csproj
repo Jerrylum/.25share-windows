@@ -69,6 +69,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connection\ServerConfig.cs" />
     <Compile Include="Connection\QuarterClient.cs" />
     <Compile Include="Connection\ToClientFlag.cs" />
     <Compile Include="Crypto\AESCrypto.cs" />

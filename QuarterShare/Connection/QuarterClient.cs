@@ -35,7 +35,7 @@ namespace QuarterShare.Connection
             this.Server = Server;
             this.Connection = Connection;
             Address = ((IPEndPoint)Connection.Client.RemoteEndPoint).Address;
-            Allowed = Program.DEFAULT_ALLOW;
+            Allowed = Server.DefaultAllow;
             Steam = Connection.GetStream();
 
             Server.AddClient(this);
@@ -43,8 +43,9 @@ namespace QuarterShare.Connection
 
         public void Close()
         {
-            Connection.Close();
+            Allowed = false;
             Server.RemoveClient(this);
+            Connection.Close();
         }
 
         public void AskAESKey()

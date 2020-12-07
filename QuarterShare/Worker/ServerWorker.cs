@@ -1,4 +1,5 @@
-﻿using QuarterShare.Connection;
+﻿using QuarterShare.Command;
+using QuarterShare.Connection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,9 +15,9 @@ namespace QuarterShare.Worker
     {
         public QuarterServer Server;
 
-        public ServerWorker(IPAddress host, int port)
+        public ServerWorker(ServerConfig init)
         {
-            Server = new QuarterServer(host, port);
+            Server = new QuarterServer(init);
 
             new Thread(MainThread).Start(Server);
         }
@@ -30,19 +31,19 @@ namespace QuarterShare.Worker
             Blue(".help");
             ColorPrint(
                 " to learn more about the server's\n@@@###@###@  internal commands\n@@@@@#@#@@@\n" +
-                "@@@###@###@  The server is running at " + Program.UsingHost.ToString() + ":" + Program.UsingPort + "\n" +
+                "@@@###@###@  The server is running at " + server.Host + ":" + server.Port + "\n" +
                 "@@@#@@@@@#@\n@#@###@###@\n@@@@@@@@@@@\n@@@@@@@@@@@\n@@@@@@@@@@@\n\n");
 
             while (true)
             {
                 try
                 {
-                    TcpClient client = server.Listener.AcceptTcpClient();
-                    new ClientWorker(server, client);
+                    TcpClient connection = server.Listener.AcceptTcpClient();
+                    new ClientWorker(server, connection);
                 }
                 catch
                 {
-                    // server shutdown or connection fail
+                    Red("Failed to accept tcp connection");
                 }
             }
 

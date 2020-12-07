@@ -1,4 +1,5 @@
-﻿using QuarterShare.Crypto;
+﻿using QuarterShare.Command;
+using QuarterShare.Crypto;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ namespace QuarterShare.Connection
 {
     class QuarterServer
     {
+        public bool DefaultAllow;
+        public Dictionary<string, bool> Flags { get; }
         public IPAddress Host { get; }
         public int Port { get; }
         public RSACrypto RSACrypto { get; }
@@ -22,10 +25,12 @@ namespace QuarterShare.Connection
         private int ClientCount;
 
 
-        public QuarterServer(IPAddress Host, int Port)
+        public QuarterServer(ServerConfig config)
         {
-            this.Host = Host;
-            this.Port = Port;
+            DefaultAllow = config.DefaultAllow;
+            Flags = config.Flags;
+            Host = config.Host;
+            Port = config.Port;
             RSACrypto = new RSACrypto();
             LatestClient = null;
             Clients = new ArrayList();
