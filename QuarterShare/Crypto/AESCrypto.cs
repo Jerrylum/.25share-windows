@@ -15,28 +15,23 @@ namespace QuarterShare.Crypto
 
         public AESCrypto(byte[] Key, byte[] Iv)
         {
-            AES = new RijndaelManaged();
-
-            AES.FeedbackSize = 8;
-            AES.BlockSize = 128;
-            AES.Key = Key;
-            AES.IV = Iv;
-            AES.Mode = CipherMode.CFB;
-            AES.Padding = PaddingMode.None;
+            AES = new RijndaelManaged
+            {
+                FeedbackSize = 8,
+                BlockSize = 128,
+                Key = Key,
+                IV = Iv,
+                Mode = CipherMode.CFB,
+                Padding = PaddingMode.None
+            };
         }
 
         public byte[] ASEEncrypt(byte[] data)
         {
             ICryptoTransform encryptor = AES.CreateEncryptor(AES.Key, AES.IV);
 
-            using (MemoryStream msEncrypt = new MemoryStream())
-            {
-                using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                {
-                    csEncrypt.Write(data, 0, data.Length);
-                    return msEncrypt.ToArray();
-                }
-            }
+            byte[] resultArray = encryptor.TransformFinalBlock(data, 0, data.Length);
+            return resultArray;
         }
 
         public byte[] ASEDecrypt(byte[] data)

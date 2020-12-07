@@ -86,6 +86,8 @@ namespace QuarterShare.Connection
         {
             byte[] Out = Util.TwoByteIndictor(send.Length).Concat(send).ToArray();
             Steam.Write(Out, 0, Out.Length);
+
+            Server.LatestClient = this;
         }
 
     }

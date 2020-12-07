@@ -1,4 +1,5 @@
 ﻿using QuarterShare.Connection;
+using QuarterShare.Worker;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace QuarterShare.Command
 {
-    class UserInput
+    class UserInput : ConsoleUser
     {
 
         public static void PrintShellCommandHelp()
@@ -16,55 +17,27 @@ namespace QuarterShare.Command
             Console.WriteLine(
                 "usage: .25share [--help] [--host:HOST] [--port:PORT] [--allow] [--flag:FLAG]\n" +
                 "\n" +
+                "FLAG\n" +
+                "    p       Print on the console(default)\n" +
+                "    c       Copy to clipboard\n" +
+                "    t       Typing text(default)\n" +
+                "\n" +
+                "    You can use multiple flags at the same time.\n" +
+                "    e.g. `t`, `c` and `pct` are acceptable" +
+                "\n" +
+                "\n" +
                 "optional arguments:\n" +
                 "  --help         Show this help message and exit\n" +
                 "  --host HOST    The server's hostname or IP address\n" +
                 "  --port PORT    The port to listen on\n" +
                 "  --allow        Allow all clients to send messages to the server\n" +
                 "  --flag FLAG    Mode flag\n" +
-                "\n" +
-                "FLAG\n" +
-                "    p       Print on the console(default)\n" +
-                "    c       Copy to clipboard\n" +
-                "    t       Typing text(default)\n" +
-                "\n" +
-                "    You can use multiple flags at the same time.\n" +
-                "    e.g. `t`, `c` and `pct` are acceptable" +
                 "\n");
         }
 
         public static void PrintInternalCommandHelp()
         {
-            Console.WriteLine(
-                "COMMAND\n" +
-                "    .help                            show this help message\n" +
-                "    .flag                            show how the server handles messages\n" +
-                "    .chflag [flag]                   change how the server handles messages\n" +
-                "    .ls                              list all connected clients\n" +
-                "    .allow <client>                  allow client(s) to send messages\n" +
-                "    .kick <client>                   kick specified client(s)\n" +
-                "    .send <client> <content>         send a message to client(s)\n" +
-                "    .stop                            stop the server\n" +
-                "\n" +
-                "CLIENT SELECTOR\n" +
-                "    @a      all clients\n" +
-                "    @p      the latest client who sent a message / connected\n" +
-                "    <ID>    specified client id, e.g. `5`\n" +
-                "\n" +
-                "FLAG\n" +
-                "    p       Print on the console(default)\n" +
-                "    c       Copy to clipboard\n" +
-                "    t       Typing text(default)\n" +
-                "\n" +
-                "    You can use multiple flags at the same time.\n" +
-                "    e.g. `t`, `c` and `pct` are acceptable" +
-                "\n" +
-                "NOTE\n" +
-                "    1. Commands must be preceded by a period.\n" +
-                "    2. Any input that does not start with a period is understood as sending\n" +
-                "       the entire sentence to the latest client (@p).\n" +
-                "    3. If you want to send a message that starts with a period, use command \n" +
-                "       `.send @p YOUR MESSAGE`\n");
+            new ShowHelpCommand(null, "").Handle();
         }
 
 
@@ -82,7 +55,7 @@ namespace QuarterShare.Command
             if (parser.Values["--help"] != null)
             {
                 PrintShellCommandHelp();
-                Environment.Exit(0);
+                Program.Close();
                 return rtn;
             }
 
@@ -102,18 +75,63 @@ namespace QuarterShare.Command
             }
             catch
             {
-                Console.WriteLine("Invalid argument error");
-                Environment.Exit(1);
+                Red("Invalid argument error\n");
+                Program.Close(1);
                 return rtn;
             }
 
             return rtn;
         }
 
-        public static bool ResolveInternalCommand(QuarterServer server, string raw)
+        public static void ResolveInternalCommand(QuarterServer server, string raw)
         {
-            //Console.WriteLine(">>" + (server == null));
-            return false;
+            Command TheCommand = null;
+
+            if (raw.StartsWith("."))
+            {
+                raw = raw.Substring(1);
+
+                Command[] AllCommands = {
+                    new ShowHelpCommand(server, raw),
+                    new ShowFlagCommand(server, raw),
+                    new ChangeFlagCommand(server, raw),
+                    new ListClientCommand(server, raw),
+                    new StopServerCommand(server, raw),
+                    new AllowClientCommand(server, raw),
+                    new KickClientCommand(server, raw),
+                    new SendToClientCommand(server, raw)
+                };
+
+                foreach (Command c in AllCommands)
+                {
+                    if (c.IsMatch())
+                    {
+                        TheCommand = c;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                TheCommand = new SendToClientCommand(server, "send @p " + raw);
+            }
+
+            if (TheCommand == null)
+            {
+                Red("Unknown command\n");
+                PrintInternalCommandHelp();
+                return;
+            }
+
+            try
+            {
+                TheCommand.Handle();
+            }
+            catch
+            {
+                Red("Command exception\n");
+                PrintInternalCommandHelp();
+            }
         }
 
         public static Dictionary<string, bool> ResolveFlag(string flag)

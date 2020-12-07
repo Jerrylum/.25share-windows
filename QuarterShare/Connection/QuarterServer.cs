@@ -14,13 +14,13 @@ namespace QuarterShare.Connection
     class QuarterServer
     {
         public bool DefaultAllow;
-        public Dictionary<string, bool> Flags { get; }
+        public QuarterClient LatestClient;
+        public Dictionary<string, bool> Flags;
         public IPAddress Host { get; }
         public int Port { get; }
         public RSACrypto RSACrypto { get; }
         public TcpListener Listener { get; }
-        public QuarterClient LatestClient { get; }
-        public ArrayList Clients { get; }
+        public List<QuarterClient> Clients { get; }
 
         private int ClientCount;
 
@@ -33,7 +33,7 @@ namespace QuarterShare.Connection
             Port = config.Port;
             RSACrypto = new RSACrypto();
             LatestClient = null;
-            Clients = new ArrayList();
+            Clients = new List<QuarterClient>();
             ClientCount = 1;
 
             try
@@ -64,11 +64,14 @@ namespace QuarterShare.Connection
             Client.Id = ClientCount + "";
             ClientCount++;
             Clients.Add(Client);
+            LatestClient = Client;
         }
 
         public void RemoveClient(QuarterClient Client)
         {
             Clients.Remove(Client);
+            if (Client == LatestClient)
+                LatestClient = null;
         }
 
         public byte[] GetFirstRSAPublicKeySendOutMessage()

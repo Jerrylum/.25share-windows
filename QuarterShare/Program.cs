@@ -8,8 +8,9 @@ namespace QuarterShare
 {
     class Program
     {
+        private static QuarterServer UsingServer;
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
             Console.WriteLine("Press any key to start the server");
@@ -21,13 +22,16 @@ namespace QuarterShare
             ServerConfig config = UserInput.ResolveShellArgument(args);
 
             ServerWorker SThread = new ServerWorker(config);
-            QuarterServer UsingServer = SThread.Server;
+            UsingServer = SThread.Server;
 
-            while (UserInput.ResolveInternalCommand(UsingServer, Console.ReadLine())) ;
-
-            UsingServer.Close();
-            Environment.Exit(0); // exit, close all thread
+            while (true) UserInput.ResolveInternalCommand(UsingServer, Console.ReadLine());
         }
 
+        public static void Close(int exitCode = 0)
+        {
+            if (UsingServer != null)
+                UsingServer.Close();
+            Environment.Exit(exitCode); // exit, close all thread
+        }
     }
 }
