@@ -31,6 +31,7 @@ namespace QuarterShare.Command
                 "  --host HOST    The server's hostname or IP address\n" +
                 "  --port PORT    The port to listen on\n" +
                 "  --allow        Allow all clients to send messages to the server\n" +
+                "                 without the user's permission\n" +
                 "  --flag FLAG    Mode flag\n" +
                 "\n");
         }
