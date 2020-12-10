@@ -12,14 +12,13 @@ namespace QuarterShare
 
         public static void Main(string[] args)
         {
+            ServerConfig config = UserInput.ResolveShellArgument(args);
+
             Console.OutputEncoding = Encoding.UTF8;
             Console.WriteLine("Press any key to start the server");
             Console.ReadKey();
+            Console.Clear();
             Console.SetCursorPosition(0, 0);
-
-
-
-            ServerConfig config = UserInput.ResolveShellArgument(args);
 
             ServerWorker SThread = new ServerWorker(config);
             UsingServer = SThread.Server;
